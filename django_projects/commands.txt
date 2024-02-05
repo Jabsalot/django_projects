@@ -1,0 +1,281 @@
+------------------------------------------------------------------------------------------------------------------------------------
+                                                CREATING AN APPLICATION SKELETON
+------------------------------------------------------------------------------------------------------------------------------------
+
+Folder made from django-admin startproject mytestsite:
+
+        - This command created the basics of what is needed for an application
+
+        1. __init__.py - - - > is an empty file that instructs Python to treat this directory as a Python package.
+
+        2. settings.py - - - > contains all the website settings, including registering any applications we create, 
+        the location of our static files, database configuration details, etc.
+
+        3. urls.py - - - > defines the site URL-to-view mappings. While this could contain all the URL mapping code, 
+        it is more common to delegate some of the mappings to particular applications, as you'll see later.
+
+        4. wsgi.py - - - >  is used to help your Django application communicate with the web server. You can treat 
+        this as boilerplate.
+
+        5. asgi.py - - - > is a standard for Python asynchronous web apps and servers to communicate with each other. 
+        Asynchronous Server Gateway Interface (ASGI) is the asynchronous successor to Web Server Gateway 
+        Interface (WSGI). ASGI provides a standard for both asynchronous and synchronous Python apps, whereas 
+        WSGI provided a standard for synchronous apps only. ASGI is backward-compatible with WSGI and supports 
+        multiple servers and application frameworks.
+
+        6. manage.py - - - > script is used to create applications, work with databases, and start the development web 
+        server.
+
+Creating a catalog - - - > py manage.py startapp catalog
+
+        - This command create a new folder an populates it with files for the
+        different parts of the application. Most of the files are names
+        after their purpose and contain some minimal boilerplate code for
+        working with the associated objects.
+        
+        1. views.py - - - >
+
+        2. models.py - - - >
+
+        3. tests.py - - - > 
+
+        4. admin.py - - - >
+
+        5. apps.py - - - >
+
+        6. Migration Folder - - - >
+
+Registering the catalog application
+
+        - Applications are registered by adding them to the INSTALLED_APPS list in the project settings
+
+                - - - > 'catalog.apps.CatalogConfig' # Object was created in /catalog/apps.py
+
+Specifying the database (settings.py)
+
+        - Best to user the same database for development and production where possible to avoid minor 
+        differences in behavior
+
+        - Will be using SQLlite as it is already configured within settings.py under DATABASES
+
+        - Other project settings
+
+                - Can change the timezone string under TIME_ZONE in settings.py
+                - Can find correct string for TIME_ZONE at:
+
+                        - - - > https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+                - Other settings to be aware of:
+
+                        - - - > SECRET_KEY: This is a key that is used as part of Django's website security
+                                strategy. If you're not protecting this code id development, you'll
+                                need to use a different code (read from an evironment variable or file)
+                                when putting it into production.
+
+                        - - - > DEBUG: Enables debugging logs to be displayed on error, rather than HTTP status 
+                                code responses. This should be set to False in production as debug 
+                                information is useful for attackers, but for now we can keep it set to 
+                                True.
+
+Hooking up URL mapper (urls.py)
+
+        - The website it created with a URL mapper file (urls.py) in the project folder. While 
+        you can use this file to manage all your URL mappings, it is more usual to defer
+        mappings to the associated application.
+
+        - 'urlpatterns' list routes URLs to views. For more information go to:
+
+                - - - > https://docs.djangoproject.com/en/4.2/topics/http/urls/
+
+        - Examples:
+
+                - - - > Function views  
+                        1. Add an import: from my_app import views
+                        2. Add a URL to urlpatterns: path('', views.home, name = 'home')
+                
+                - - - > Class-based views       
+                        1. Add an import: from other_app.views import Home
+                        2. Add a URL to urlpatterns: path('', Home.as_view(), name = 'home')
+
+                - - - > Including another URLconf
+                        1. Import the include() function: from django.urls import include, path
+                        2. Add a url to urlpatterns: path('blog/', include('blog.urls'))
+
+        - Code
+
+                - - - > from django.contrib import admin
+                        from django.urls import path
+
+                        urlpatterns = [
+                                path('admin/', admin.site.urls),
+                        ]
+
+                        - URL mappings are manages through the urlpatterns variable, which is a Python
+                        list of path()
+
+                        - Each path() function either associates a URL pattern to a specific view, which
+                        will be displayed when the pattern is matched, or with another list of URL
+                        pattern testing code (in the second case, the pattern becomes the "base URL"
+                        for patterns defined in the target module).
+
+                        - The urlpatterns list initially defines a single function that maps all URLs with 
+                        pattern admin/ to the module  - - - > admin.site.urls < - - - , which contains
+                        the Administration application's own URL mapping definitions.
+
+        - Note
+
+                - - - > Note: The route in path() is a string defining a URL pattern to match. This string might 
+                        include a named variable (in angle brackets), e.g. 'catalog/<id>/'. This pattern 
+                        will match a URL like catalog/any_chars/ and pass any_chars to the view as a string 
+                        with the parameter name id. We discuss path methods and route patterns further in 
+                        later topics.
+
+        - Code Implementation
+
+                - To add a new list item to the urlpatterns list, add the following lines to the bottom of the 
+                file. This new item includes a path() that forwards requests with the pattern catalog/ 
+                to the module catalog.urls (the file with the relative URL catalog/urls.py).
+
+                - - - > # Use include() to add paths from the catalog application
+                        from django.urls import include
+
+                        urlpatterns += [
+                                path('catalog/', include('catalog.urls')),
+                        ]
+        
+        - Redirecting the root URL from 127.0.0.1:8000 - - - > 127.0.0.1:8000/catalog/
+
+                - This is the only app we'll be using in this project. Do do this 
+                will be using a special view function
+
+                - - - > RedirectView: Takes the new relative URL to redirect to (/catalog/)
+                        as its first argument when the URL pattern specified in the
+                        path() function is matched (the root URL, in this case)
+
+                - Django does not serve static files like CSS, JavaScript, and images 
+                by default, but it can be useful for the development web server 
+                to do so while you're creating your site. As a final addition to 
+                this URL mapper, you can enable the serving of static files during 
+                development by appending the following lines.
+
+                        - - - > # Use static() to add URL mapping to serve static files during development (only)
+                                from django.conf import settings
+                                from django.conf.urls.static import static
+                                urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+                        - NOTE: Note: There are a number of ways to extend the urlpatterns list (previously, we 
+                        just appended a new list item using the += operator to clearly separate the old 
+                        and new code). We could have instead just included this new pattern-map in the 
+                        original list definition:
+
+                                - - - > urlpatterns = [
+                                                path('admin/', admin.site.urls),
+                                                path('catalog/', include('catalog.urls')),
+                                                path('', RedirectView.as_view(url='catalog/')),
+                                        ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+        - Final Step
+
+                - Create a file inside your catalog folder called urls.py, and add the following text to define the 
+                (empty) imported urlpatterns. This is where we'll add our patterns as we build the application.
+                
+                        - - - > from django.urls import path
+                                from . import views
+
+                                        urlpatterns = [
+
+                                ]
+
+Testing the website
+
+        - Before testing changes run a database migration. This updates our database (to include any models in our
+        installed applications) and removes some build warnings
+
+        - Running database migrations
+
+                - Django uses an Object-Relational Mapper (ORM) to map model definitions in the Django code to the 
+                data structure used by the underlying database. As model definitions are changes, Django 
+                tracks the changes and can create database migration scripts (in
+                - - - > /locallibrary/catalog/migartions/) to automatically migrate the underlying data
+                structure in the database to match the model.
+
+                - - - > Make sure you are in the diretory that contains - - - > manage.py
+                - - - > py manage.py makemigrations
+                - - - > py manage.py migrate
+
+                        - - - > WARNING: Command will need to be ran every time models change in a way
+                                that will affect the structure of the data that needs to be
+                                stored.
+
+                        - - - > https://docs.djangoproject.com/en/4.2/topics/migrations/
+
+Running the website
+
+        - Development web server is not robust or performant enough for production use, but it is a very easyt
+        way to get your Django website up and running during development to give it a convenient quick
+        test.
+
+                - - - > By default it will serve the site to your local computer (http://127.0.0.1:8000/), 
+                        but you can also specify other computers on your network to serve to.
+
+        - Run the development web server by calling the runserver command in same directory as manage.py
+
+                - - - > py manage.py runserver
+
+                        - An error is expected to pop up as there are no pages/urls defined in the catalog.urls 
+                        module (which we're redirected to when we get a URL to the root of the site).
+
+------------------------------------------------------------------------------------------------------------------------------------
+                                                        USING MODELS
+------------------------------------------------------------------------------------------------------------------------------------
+
+RESOURCE - - - > https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Models
+
+OVERVIEW
+
+        - Django web applications access and manage data through Python objects reffered to as models.
+
+        - Models define the structure of stored data, including the field types and possibly also their
+        maximum size, default values, selection list options, help text for documentation, label text
+        for forms, etx.
+
+        - You can just write your model structure and other code, and Django hadles all the dirty work 
+        of communication with the database for you.
+
+
+
+DESIGNING THE LOCALLIBRARY MODELS
+
+        - We need information about book (title, summary, author, writtin language, category, ISBN) 
+        - We might need to store more information about the author than just their name, and there 
+        might be multiple authors with the same or similar names.
+        - Want to sort information based on book title, author, written language, and category
+
+        - When designing models, it makes since to have separate models for every "object" (group
+        of relaated information). 
+        - Obvious object are book instances, and authors.
+
+        - It might be useful to use models to represent selection-list options (drows down list of choices), 
+        rather than hard coding the choices into the website itself. Best used when all options aren't known up front or may change.
+        - Obvious candidates for models, in this case, include, the book genre and language.
+
+        - Need to find a relationship between the models and fields.
+        - Django allows you to define relationships that are one to one (OneToOneField), one to many (ForeignKey) and many to many 
+        (ManyToManyField).
+
+MODEL PRIMER
+
+        - Model definition
+
+                - - - > Models are defined in an application's models.py file.
+                - - - > Implemented as a subclass of django.db.models.Model
+                - - - > Can include:
+
+                                1. fields
+                                2. methods
+                                3. metadata
+                
+                - - - > 
+
+
+                
